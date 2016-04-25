@@ -53,21 +53,46 @@ def ejercicio11(T):
         temp = u*T
         S.append(temp)
     S.sort()
-    return S
+    sumab= 0
+    for i in xrange(n):
+    	t = random()
+    	t = int(t*20) + 20
+    	sumab += t
 
+    return sumab
 
-print (PPoissonNH(5,1))
-print("----------------")
-print (ejercicio11(1))
+def a(t):
+	return 3 + 4/(t+1)
+
+def adelgazamiento(lamb, T):
+    t, i = 0, 0
+    S = []
+
+    while True:
+        # generar U uniform(0, 1)
+        U = random()
+
+        if t - log(U) / lamb > T:
+            break
+
+        else:
+            t = t - log(U) / lamb
+            # generar V
+            V = random()
+
+            if V < a(t) / lamb:
+                i += 1
+                S.append(t)
+
+    return i
 
 def esperanza(n = 100):
 	X = 0
 	Y = 0
 	Z = 0
 	for _ in xrange(n):
-		X += Poisson(5, 12)
-		Y += poisson(5*12)
-		Z += poissonExt(5*12)
+		X += adelgazamiento(7,10)
 
-	return X / float(n), Y / float(n), Z / float(n)
+	return X / float(n)
 
+print (esperanza(100))
