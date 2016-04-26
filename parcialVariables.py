@@ -44,7 +44,8 @@ def geometrica(q):
     return X
 
 def poisson(lam):
-    i, p = 0, exp(-lam)
+    i=0
+    p =exp(-lam)
     F = p
     # uniform in (0,1)
     U = random()
@@ -97,6 +98,36 @@ def poissonMejor(lam):
 
     return i
 '''
+
+"""
+F = p0
+i = 0
+generar u
+while u > F
+    i = i +1
+    F += P(i)
+return i
+"""
+
+"""
+algoritmo tabla 
+
+dk = suma digitos orden k / 10^K
+input , vector1, vector2, size v1, size V2
+
+generar u
+
+if U<d1
+    generar V
+    j = floor(m*V)
+    x = Vector1[j]
+else
+    generar V
+    j = fllor(n*v)
+    x = vector2(j)
+"""
+
+
 
 def binomial(p, n):
     # generar U uniform(0, 1)
@@ -228,7 +259,7 @@ def normalTotal():
         Z = Y1
 
     else:
-        Z = -Y2
+        Z = -Y1
 
     return Z
 
@@ -253,7 +284,7 @@ def normalPolar2():
         V2 = 2 * U2 - 1
         S = V1**2 + V2**2
 
-    C = (-2 * log(S) / S)
+    C = (-2 * log(S) / S)**(1/2)
     X = C * V1
     Y = C * V2
 
