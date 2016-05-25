@@ -1,6 +1,40 @@
 from math import exp, log
 from random import random
 
+def ejercicio1p():
+    #1 blanca 2 rosa 3 roja
+    U=random()
+    Y=0
+    if U < 0.5:
+        Y = 2
+    elif U < 0.75:
+        Y = 1
+    elif U >= 0.75:
+        Y = 3
+    return Y
+
+def simularPdiscreto(n,r,t,k,prob):
+    Ylist = []
+    Nlist = []
+    exitos = 0
+    for _ in range(r):
+        for _ in range(n):
+            Ylist.append(ejercicio1p())
+
+        for i in range(k):
+            Nlist.append(Ylist.count(i+1))
+        suma = 0
+        T = 0
+        for i in range(k):       
+            suma = ((Nlist[i] - prob[i]*n)**2)/float(prob[i]*n)
+            T += suma
+        Ylist = []
+        Nlist = []
+        if T>=t:
+            exitos +=1
+
+    return exitos/float(r)
+
 def ejercicio1():
     n = 564
     pBlanca = 0.25
@@ -16,7 +50,7 @@ def ejercicio1():
     npRoja = n * pRoja #= 141
 
     T = ((NBlanca-npBlanca)**2/float(npBlanca)) + ((NRosa-npRosa)**2/float(npRosa)) + ((NRoja-npRoja)**2/float(npRoja))
-
+    print(simularPdiscreto(n,100,T,3,[0.25,0.5,0.25]))
     #T es 0.86 y de resultado es 0.65
     print (T)
 
@@ -40,6 +74,7 @@ def ejercicio2():
 
 def acumulada(y,lamb):
     return 1 - exp(-lamb*y)
+
 
 def simularP(r,n,d):
     valores = []
@@ -151,4 +186,4 @@ def ejercicio7(alfa):
     else:
         print("No rechaza H0")
 
-ejercicio7(0.01)
+ejercicio1()
