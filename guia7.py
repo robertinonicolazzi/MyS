@@ -1,5 +1,66 @@
-from math import exp, log
-from random import random
+from math import exp, log,floor,sqrt,factorial
+from random import random,randint, choice
+
+def binomialProb(n,p,k):
+    f = math.factorial
+    comb = f(n) / float(f(k)*f(n-k))
+    return p**k *(1-p)**(n-k) * comb
+
+def estimarEsperanza(lst):
+    """calculates mean"""
+    return sum(lst) / len(lst)
+
+def estimarPbinomial(lst,t):
+    return estimarEsperanza(lst)/float(t)
+
+def estimarDesviacion(lst,esperanza):
+    """returns the standard deviation of lst"""
+    if esperanza == 0:
+        mn = estimarEsperanza(lst)
+    else:
+        mn = esperanza
+    suma = sum([(e-mn)**2 for e in lst])
+    return suma/float(len(lst)-1),sqrt(suma/float(len(lst)-1))
+
+def estimarDesviacionNormal(lst,esperanza):
+    if esperanza == 0:
+        mn = estimarEsperanza(lst)
+    else:
+        mn = esperanza
+    suma = sum([(e-mn)**2 for e in lst])
+    return suma/float(len(lst)),sqrt(suma/float(len(lst)))
+
+def estimacionesXlista(n,lista):
+    M = choice(lista)
+    S2 = 0
+    for i in range(2,n+1):
+        X = choice(lista)
+        Manterior= M
+        M = M + (X - M)/float(i)
+        S2 = (1 - 1/float(i-1))*S2 + (i)*((M-Manterior)**2)
+    j = n
+    datos = 0
+
+    while float(sqrt(S2/float(j))) > 0.01:
+        j += 1
+        datos += 1
+        X = choice(lista)
+        Manterior = M
+        M = M + (X - M)/float(j)
+        S2 = (1 - 1/float(j-1))*S2 + j*((M-Manterior)**2)
+    return datos, sqrt(S2), M
+
+#print(estimacionesXlista(100,[1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8]))
+#print(estimarDesviacionNormal([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],0))
+print(estimarDesviacion([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],8))
+print(estimarPbinomial([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],8))
+"""""""""""""""""""""""""""""""""""""""""""""""
+Ejercicio 1 y 2, simulacion de p valor discreto
+"""""""""""""""""""""""""""""""""""""""""""""""
+
+def ejercicio2p():
+    Y = randint(1,6)
+    return Y
 
 def ejercicio1p():
     #1 blanca 2 rosa 3 roja
@@ -13,13 +74,13 @@ def ejercicio1p():
         Y = 3
     return Y
 
-def simularPdiscreto(n,r,t,k,prob):
+def simularPdiscreto(n,r,t,k,prob,p):
     Ylist = []
     Nlist = []
     exitos = 0
     for _ in range(r):
         for _ in range(n):
-            Ylist.append(ejercicio1p())
+            Ylist.append(p())
 
         for i in range(k):
             Nlist.append(Ylist.count(i+1))
@@ -28,6 +89,7 @@ def simularPdiscreto(n,r,t,k,prob):
         for i in range(k):       
             suma = ((Nlist[i] - prob[i]*n)**2)/float(prob[i]*n)
             T += suma
+        print (Nlist)
         Ylist = []
         Nlist = []
         if T>=t:
@@ -50,7 +112,7 @@ def ejercicio1():
     npRoja = n * pRoja #= 141
 
     T = ((NBlanca-npBlanca)**2/float(npBlanca)) + ((NRosa-npRosa)**2/float(npRosa)) + ((NRoja-npRoja)**2/float(npRoja))
-    print(simularPdiscreto(n,100,T,3,[0.25,0.5,0.25]))
+    print(simularPdiscreto(n,1000,T,3,[0.25,0.5,0.25],ejercicio1p))
     #T es 0.86 y de resultado es 0.65
     print (T)
 
@@ -68,9 +130,13 @@ def ejercicio2():
     npHonesto = n* pHonesto #= 141
 
     T = ((N1-npHonesto)**2 + (N2-npHonesto)**2 + (N3-npHonesto)**2+ (N4-npHonesto)**2+ (N5-npHonesto)**2+ (N6-npHonesto)**2)/float(npHonesto)
-
+    print(simularPdiscreto(n,1,T,6,[0.16,0.16,0.16,0.16,0.16,0.16],ejercicio2p))
     #chi de 5 libertad de 2.18 es 0.82372
     print (T)
+
+"""""""""""""""""""""""""""""""""""""""""""""""
+Ejercicio 4, 6 , 7, usan kogomolov simulacion de p valor discreto
+"""""""""""""""""""""""""""""""""""""""""""""""
 
 def acumulada(y,lamb):
     return 1 - exp(-lamb*y)
@@ -186,4 +252,4 @@ def ejercicio7(alfa):
     else:
         print("No rechaza H0")
 
-ejercicio1()
+
