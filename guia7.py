@@ -1,5 +1,5 @@
 from math import exp, log,floor,sqrt,factorial
-from random import random,randint, choice
+from random import random,randint, choice,shuffle
 
 def binomialProb(n,p,k):
     f = math.factorial
@@ -52,8 +52,9 @@ def estimacionesXlista(n,lista):
 
 #print(estimacionesXlista(100,[1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8]))
 #print(estimarDesviacionNormal([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],0))
-print(estimarDesviacion([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],8))
-print(estimarPbinomial([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],8))
+#print(estimarDesviacion([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],8))
+#print(estimarPbinomial([1,2,2,3,3,3,3,4,5,6,6,7,7,7,7,7,8,8],8))
+
 """""""""""""""""""""""""""""""""""""""""""""""
 Ejercicio 1 y 2, simulacion de p valor discreto
 """""""""""""""""""""""""""""""""""""""""""""""
@@ -151,13 +152,13 @@ def simularP(r,n,d):
         for _ in range(n):
             valores.append(random())
         j = 1
+        valores.sort()
         for U in valores:
             valoresD.append(j/float(n) - U)
             valoresD.append(U - (j-1)/float(n))
             j += 1
 
         D = max(valoresD)
-        print(D)
         if D >= d:
             exitos += 1
         valores = []
@@ -181,10 +182,8 @@ def ejercicio4(alfa):
 
 
     #D = d calcular p = Pf(D>=d)
-    p = simularP(10,len(valores), D)
-    print("p y D")
-    print(D)
-    print(p)
+    p = simularP(100,len(valores), D)
+    print("D:"),D,"| p-valor:",p
     if p < alfa :
         print("Rechaza H0")
     else:
@@ -211,12 +210,10 @@ def ejercicio6(alfa):
     D = max(valoresD)
 
 
-    print(valoresD)
+
     #D = d calcular p = Pf(D>=d)
-    p = simularP(1,len(valores), D)
-    print("p y D")
-    print(D)
-    print(p)
+    p = simularP(100,len(valores), D)
+    print("D:"),D,"| p-valor:",p
     if p < alfa :
         print("Rechaza H0")
     else:
@@ -227,6 +224,7 @@ def estMedia(lista):
     
 
 def ejercicio7(alfa):
+
     valoresD = []
     valores = [1.6,10.3,3.5,13.5,18.4,7.7,24.3,10.7,8.4,4.9,7.9,12,16.2,6.8,14.7]
     valores.sort()
@@ -241,15 +239,82 @@ def ejercicio7(alfa):
     D = max(valoresD)
 
 
-    print(valoresD)
+
     #D = d calcular p = Pf(D>=d)
-    p = simularP(10,len(valores), D)
-    print("p y D")
-    print(D)
-    print(p)
+    p = simularP(100,len(valores), D)
+    print("D:"),D,"| p-valor:",p
     if p < alfa :
         print("Rechaza H0")
     else:
         print("No rechaza H0")
 
+#print "ejercicio 4 = ",(ejercicio4(0.5))
+#print "ejercicio 6 = ",(ejercicio6(0.5))
+#print "ejercicio 7 = ",(ejercicio7(0.5))
 
+import sys
+sys.setrecursionlimit(3000)
+"""""""""""""""""""""""""""""""""""
+ ejercicio 9 y 10
+"""""""""""""""""""""""""""""""""""
+
+def P(n,m,r):
+    if n == 1 and m == 0:
+        if r <= 0:
+            return 0
+        else:
+            return 1
+    if n == 0 and m == 1:
+        if r < 0:
+            return 0
+        else:
+            return 1
+    a = 0
+    b = 0
+    if not n == 0:
+        a = n*P(n-1,m,r-n-m)/float(n+m)
+    if not m == 0:
+        b = m*P(n,m-1,r)/float(n+m)
+    return a + b
+
+def recursivoPvalor(n,m,r):
+    return 2*min(P(n,m,r),1- P(n,m,r-1))
+
+#import scipy.stats
+
+def aproxNormal(n,m,r):
+    E = n*(n+m+1)/float(2)
+    V = n*m*(n+m+1)/float(12)
+    DV = sqrt(V)
+
+    rPrima = (r - E)/float(DV)
+
+    if r <= E:
+        return 2*scipy.stats.norm(0, 1).cdf(rPrima)
+    else:
+        return 2*(1 - scipy.stats.norm(0, 1).cdf(rPrima))
+
+#a = aproxNormal(5,10,55) esto funciona bien !!!!!!!!!!
+#print(a)
+
+# print(recursivoPvalor(5,10,55)) pValor recursivo tmb funciona!!!!!!!
+
+def simularPvalor(n,m,r,t):
+    Rmenor = 0
+    Rmayor = 0
+    var = list(range(1,n+m))
+    for _ in range(t):
+        
+        
+        total = 0
+        shuffle(var)
+        for i in range(n):
+            total += var[i]
+    
+        if total < r:
+            Rmenor += 1
+        else:
+            Rmayor += 1
+    return Rmenor/float(t), Rmayor/float(t)
+
+print(simularPvalor(5,10,55,1000))
