@@ -1,5 +1,16 @@
 from math import exp, log,floor,sqrt,factorial
 from random import random,randint, choice,shuffle
+import scipy.stats as st
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def binomialProb(n,p,k):
     f = math.factorial
@@ -22,13 +33,13 @@ def estimarDesviacion(lst,esperanza):
     suma = sum([(e-mn)**2 for e in lst])
     return suma/float(len(lst)-1),sqrt(suma/float(len(lst)-1))
 
-def estimarDesviacionNormal(lst,esperanza):
+def estimarEsperanzaDesviacionNormal(lst,esperanza):
     if esperanza == 0:
         mn = estimarEsperanza(lst)
     else:
         mn = esperanza
     suma = sum([(e-mn)**2 for e in lst])
-    return suma/float(len(lst)),sqrt(suma/float(len(lst)))
+    return mn, suma/float(len(lst)),sqrt(suma/float(len(lst)))
 
 def estimacionesXlista(n,lista):
     M = choice(lista)
@@ -90,7 +101,6 @@ def simularPdiscreto(n,r,t,k,prob,p):
         for i in range(k):       
             suma = ((Nlist[i] - prob[i]*n)**2)/float(prob[i]*n)
             T += suma
-        print (Nlist)
         Ylist = []
         Nlist = []
         if T>=t:
@@ -103,40 +113,58 @@ def ejercicio1():
     pBlanca = 0.25
     pRosa = 0.5
     pRoja = 0.25
+    prob = [pBlanca,pRosa,pRoja]
 
     NBlanca = 141
     NRosa = 291
     NRoja = 132
+    obs = [NBlanca,NRosa,NRoja]
 
     npBlanca = n* pBlanca #= 141
     npRosa = n* pRosa #= 282
     npRoja = n * pRoja #= 141
 
     T = ((NBlanca-npBlanca)**2/float(npBlanca)) + ((NRosa-npRosa)**2/float(npRosa)) + ((NRoja-npRoja)**2/float(npRoja))
-    print(simularPdiscreto(n,1000,T,3,[0.25,0.5,0.25],ejercicio1p))
+    print " simulado",(simularPdiscreto(n,1000,T,3,[0.25,0.5,0.25],ejercicio1p))
+    print " chi2",1 - st.chi2.cdf(T,2)
+    print " chi (python)",st.chisquare([141,291,132], f_exp=[141,282,141])
     #T es 0.86 y de resultado es 0.65
-    print (T)
+
+
 
 def ejercicio2():
     n = 1000
     pHonesto = 1/float(6)
-
+    
     N1 = 158
     N2 = 172
     N3 = 164
     N4 = 181
     N5 = 160
     N6 = 165
-
+    obs = [N1,N2,N3,N4,N5,N6]
     npHonesto = n* pHonesto #= 141
-
-    T = ((N1-npHonesto)**2 + (N2-npHonesto)**2 + (N3-npHonesto)**2+ (N4-npHonesto)**2+ (N5-npHonesto)**2+ (N6-npHonesto)**2)/float(npHonesto)
-    print(simularPdiscreto(n,1,T,6,[0.16,0.16,0.16,0.16,0.16,0.16],ejercicio2p))
+    esp = [npHonesto,npHonesto,npHonesto,npHonesto,npHonesto,npHonesto]
+    T = (
+    (N1-npHonesto)**2 +
+    (N2-npHonesto)**2 + 
+    (N3-npHonesto)**2+ 
+    (N4-npHonesto)**2+ 
+    (N5-npHonesto)**2+ 
+    (N6-npHonesto)**2)/float(npHonesto)
+    print " simulado",(simularPdiscreto(n,1000,T,6,[pHonesto,pHonesto,pHonesto,pHonesto,pHonesto,pHonesto],ejercicio2p))
+    print " chi2",1 - st.chi2.cdf(T,5)
+    print " chi (python)",st.chisquare(obs, f_exp=esp)
     #chi de 5 libertad de 2.18 es 0.82372
-    print (T)
+
+
+print (bcolors.OKGREEN + "---------------ejercicio1-----------------"+ bcolors.ENDC)
+ejercicio1()
+print (bcolors.HEADER + "---------------ejercicio2-----------------"+ bcolors.ENDC)
+ejercicio2()
 
 """""""""""""""""""""""""""""""""""""""""""""""
-Ejercicio 4, 6 , 7, usan kogomolov simulacion de p valor discreto
+Ejercicio 4, 6 , 7,,8 usan kogomolov simulacion de p valor discreto
 """""""""""""""""""""""""""""""""""""""""""""""
 
 def acumulada(y,lamb):
@@ -165,13 +193,38 @@ def simularP(r,n,d):
         valoresD = []
     return exitos/float(r)
 
+def ejercicio3(alfa):
+    valoresD = []
+    valores = [0.12,0.18,0.06,0.33,0.72,0.83,0.36,0.27,0.77,0.74]
+    valores.sort()
+
+    j = 1
+    n = len(valores)
+    for i in valores:
+        valoresD.append(j/float(n) - st.uniform.cdf(i))
+        valoresD.append(st.uniform.cdf(i) - (j-1)/float(n))
+        j += 1
+        
+    D = max(valoresD)
+
+
+
+    #D = d calcular p = Pf(D>=d)
+    p = simularP(100,len(valores), D)
+    print("D:"),D,"| p-valor:",p
+    print "kstest (python)", st.kstest(valores,lambda x: st.uniform.cdf(x))
+    if p < alfa :
+        print("Rechaza H0")
+    else:
+        print("No rechaza H0")
+
 def ejercicio4(alfa):
     valoresD = []
     valores = [86,133,75,22,11,144,78,122,8,146,33,41,99]
     valores.sort()
 
     j = 1
-    n = 13
+    n = len(valores)
     for i in valores:
         valoresD.append(j/float(n) - acumulada(i,0.02))
         valoresD.append(acumulada(i,0.02) - (j-1)/float(n))
@@ -184,14 +237,31 @@ def ejercicio4(alfa):
     #D = d calcular p = Pf(D>=d)
     p = simularP(100,len(valores), D)
     print("D:"),D,"| p-valor:",p
+    print "kstest (python)", st.kstest(valores,lambda x: st.expon.cdf(x, scale=1/float(0.02)))
     if p < alfa :
         print("Rechaza H0")
     else:
         print("No rechaza H0")
 
+print("--------------ejercicio3------------")
+ejercicio3(0.5)
+
+print("--------------ejercicio4------------")
+ejercicio4(0.5)
+
 def exponencial(lamb):
     U= random()
     return (- log(U)/float(lamb))
+
+def ejercicio5():
+    val1 = [0,1,2,4,1,1,2,5,2]
+    valores = [6,7,3,4,7,3,7,2,6,3,7,8,2,1,3,5,8,7]
+    p = estimarPbinomial(valores,8)
+    val2 = [st.binom.cdf(x,8,p)*18 for x in val1]
+    print " chi (python)",st.chisquare(val1, f_exp=val2)
+
+print("------------ejercicio5------------")
+ejercicio5()
 
 def ejercicio6(alfa):
     valoresD = []
@@ -201,7 +271,7 @@ def ejercicio6(alfa):
     valores.sort()
 
     j = 1
-    n = 13
+    n = len(valores)
     for i in valores:
         valoresD.append(j/float(n) - acumulada(i,1))
         valoresD.append(acumulada(i,1) - (j-1)/float(n))
@@ -214,14 +284,21 @@ def ejercicio6(alfa):
     #D = d calcular p = Pf(D>=d)
     p = simularP(100,len(valores), D)
     print("D:"),D,"| p-valor:",p
+    print " kstest (python)",st.kstest(valores,'expon')
     if p < alfa :
         print("Rechaza H0")
     else:
         print("No rechaza H0")
 
+print("------------ejercicio6------------")
+ejercicio6(0.5)
+
 def estMedia(lista):
     return sum(lista)/float(len(lista))
     
+
+def cdfExpKstest(y):
+    return 1 - exp(-0.0932256059664*y)
 
 def ejercicio7(alfa):
 
@@ -230,7 +307,7 @@ def ejercicio7(alfa):
     valores.sort()
     lamb= 1/float(estMedia(valores))
     j = 1
-    n = 13
+    n = len(valores)
     for i in valores:
         valoresD.append(j/float(n) - acumulada(i,lamb))
         valoresD.append(acumulada(i,lamb) - (j-1)/float(n))
@@ -243,14 +320,46 @@ def ejercicio7(alfa):
     #D = d calcular p = Pf(D>=d)
     p = simularP(100,len(valores), D)
     print("D:"),D,"| p-valor:",p
+    print " kstest (python)",st.kstest(valores,lambda x: st.expon.cdf(x, scale=1/float(lamb)))
     if p < alfa :
         print("Rechaza H0")
     else:
         print("No rechaza H0")
 
+print("------------ejercicio7------------")
+ejercicio7(0.5)
+
 #print "ejercicio 4 = ",(ejercicio4(0.5))
 #print "ejercicio 6 = ",(ejercicio6(0.5))
 #print "ejercicio 7 = ",(ejercicio7(0.5))
+
+def ejercicio8(alfa):
+    valoresD=[]
+    valores = [91.9,97.8,111.4,122.3,105.4,95,103.8,99.6,119.3,104.8,101.7]
+    valores.sort()
+    E,V,DV = estimarEsperanzaDesviacionNormal(valores,0)
+    j = 1
+    n = len(valores)
+    for i in valores:
+        valoresD.append(j/float(n) - st.norm(E, DV).cdf(i))
+        valoresD.append(st.norm(E, DV).cdf(i) - (j-1)/float(n))
+        j += 1
+        
+    D = max(valoresD)
+
+
+
+    #D = d calcular p = Pf(D>=d)
+    p = simularP(10000,len(valores), D)
+    print("D:"),D,"| p-valor:",p
+    print " kstest (python)",st.kstest(valores,lambda x: st.norm.cdf(x, loc = E, scale=DV))
+    if p < alfa :
+        print("Rechaza H0")
+    else:
+        print("No rechaza H0")
+
+print("------------ejercicio8------------")
+ejercicio8(0.5)
 
 import sys
 sys.setrecursionlimit(3000)
@@ -280,7 +389,7 @@ def P(n,m,r):
 def recursivoPvalor(n,m,r):
     return 2*min(P(n,m,r),1- P(n,m,r-1))
 
-#import scipy.stats
+
 
 def aproxNormal(n,m,r):
     E = n*(n+m+1)/float(2)
@@ -290,9 +399,9 @@ def aproxNormal(n,m,r):
     rPrima = (r - E)/float(DV)
 
     if r <= E:
-        return 2*scipy.stats.norm(0, 1).cdf(rPrima)
+        return 2*st.norm(0, 1).cdf(rPrima)
     else:
-        return 2*(1 - scipy.stats.norm(0, 1).cdf(rPrima))
+        return 2*(1 - st.norm(0, 1).cdf(rPrima))
 
 #a = aproxNormal(5,10,55) esto funciona bien !!!!!!!!!!
 #print(a)
@@ -317,4 +426,4 @@ def simularPvalor(n,m,r,t):
             Rmayor += 1
     return Rmenor/float(t), Rmayor/float(t)
 
-print(simularPvalor(5,10,55,1000))
+#print(simularPvalor(5,10,55,1000)) esto anda mall 
