@@ -54,6 +54,22 @@ def montecarlo(n):
 
 	return sumExp / float(n)
 
+
+def algoritmoProporcion(n=100,p):
+    P = p
+    for i in xrange(2, n+1):
+        X = p
+        P = P + (X-P)/float(i)
+    j = 100
+    datos = 0
+
+    while float(sqrt(P*(1-P)/float(j))) > 0.001:
+        j += 1
+        X = p
+        P = P + (X-P)/float(j)
+
+    return P
+
 def algoritmo(n,p):
     M = p
     S2 = 0

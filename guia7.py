@@ -1,6 +1,8 @@
 from math import exp, log,floor,sqrt,factorial
 from random import random,randint, choice,shuffle
+from parcialVariables import binomial
 import scipy.stats as st
+import scipy.special as ss
 
 class bcolors:
     HEADER = '\033[95m'
@@ -13,13 +15,12 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def binomialProb(n,p,k):
-    f = math.factorial
-    comb = f(n) / float(f(k)*f(n-k))
+    comb = factorial(n) / float(factorial(k)*factorial(n-k))
     return p**k *(1-p)**(n-k) * comb
 
 def estimarEsperanza(lst):
     """calculates mean"""
-    return sum(lst) / len(lst)
+    return sum(lst) /float(len(lst))
 
 def estimarPbinomial(lst,t):
     return estimarEsperanza(lst)/float(t)
@@ -249,19 +250,230 @@ ejercicio3(0.5)
 print("--------------ejercicio4------------")
 ejercicio4(0.5)
 
+
+
+
 def exponencial(lamb):
     U= random()
     return (- log(U)/float(lamb))
 
-def ejercicio5():
-    val1 = [0,1,2,4,1,1,2,5,2]
+
+"""
+
+"""
+def binomial2(x, n, p):
+    return factorial(n) / float (factorial(n - x) * factorial(x)) * p**x * (1-p)**(n - x)
+
+
+
+
+def probabilidadBinomial(n, p, i):
+    combinatorio = factorial(n)/float(factorial(i) * factorial(n-i))
+
+    return combinatorio*(p**i)*((1 - p)**(n-i))
+
+def tabla():
+	l = [6, 7, 3, 4, 7, 3, 7, 2, 6, 3, 7, 8, 2, 1, 3, 5, 8, 7]
+	n = len(l) # numero de muestra
+	intervalos = [[0,1,2],[3,4,5],[6,7,8]]
+	pMuestra = estimarPbinomial(l, 8)
+	N=[]
+	for i in intervalos:
+		suma = 0
+		for x in l:
+			suma += i.count(x)
+		N.append(suma)
+
+
+	binomial1 = []
+
+	for i in xrange(0,9):
+		binomial1.append(probabilidadBinomial(8,pMuestra,i))
+
+	Np= []
+	Np.append(binomial1[0]+binomial1[1]+binomial1[2])
+	Np.append(binomial1[3]+binomial1[4]+binomial1[5])
+	Np.append(binomial1[6]+binomial1[7]+binomial1[8])
+
+
+	T = 0
+	for j in xrange(len(intervalos)):
+		denomi = n * Np[j]
+		T += (N[j] - denomi)**2 / denomi
+	return T
+
+
+
+#esto funciona bien no tocar
+def tabla2():
+	l = [6,7,3,4,7,2,6,3,7,8,2,1,3,5,8,7]
+	n = len(l) # numero de muestra
+	intervalos = [[0,1,2,3],[4],[5],[6],[7,8]]
+	pMuestra = estimarPbinomial(l,8)
+
+	N=[]
+	for i in intervalos:
+		suma = 0
+		for x in l:
+			suma += i.count(x)
+		N.append(suma)
+
+
+	binomial1 = []
+	for i in xrange(0,9):
+		binomial1.append(probabilidadBinomial(8,pMuestra,i))
+
+
+	Np= []
+	Np.append(binomial1[0]+binomial1[1]+binomial1[2]+binomial1[3])
+	Np.append(binomial1[4])
+	Np.append(binomial1[5])
+	Np.append(binomial1[6])
+	Np.append(binomial1[7]+binomial1[8])
+
+	T = 0
+	for j in xrange(len(intervalos)):
+		denomi = n * Np[j]
+		T += (N[j] - denomi)**2 / float(denomi)
+	return T
+
+
+def ejercicio5b():
+    val1 = [6,1,1,2,6]
     valores = [6,7,3,4,7,3,7,2,6,3,7,8,2,1,3,5,8,7]
     p = estimarPbinomial(valores,8)
     val2 = [st.binom.cdf(x,8,p)*18 for x in val1]
-    print " chi (python)",st.chisquare(val1, f_exp=val2)
+    print " chi (python)",st.chisquare(val1, f_exp=[2.37,3.49,4.5,3.62,2.01],ddof=1)
+    print " chi2", 1 - st.chi2.cdf(tabla2(),3)
 
-print("------------ejercicio5------------")
-ejercicio5()
+print("------------ejercicio5b------------")
+ejercicio5b()
+
+def ejer5ext1(r):
+	'''
+	k = numero de intervalos
+	r = numero de iteraciones
+	'''
+	l = [6,7,3,4,7,3,7,2,6,3,7,8,2,1,3,5,8,7]
+	l = [6, 7, 3, 4, 7, 3, 7, 2, 6, 3, 7, 8, 2, 1, 3, 5, 8, 7]
+	n = len(l) # numero de muestra
+	t = tabla()
+	intervalos = [[0,1,2],[3,4,5],[6,7,8]]
+	pMuestra = estimarPbinomial(l, 8) # obtener la estimacion de la muestra
+	exitos = 0
+	for _ in xrange(r):
+		Y = []
+		for i in xrange(n):
+			# generamos los Y de la F propuesta con parametro p y n = 8
+			Y.append(binomial(pMuestra, 8))
+
+		N = []
+		for i in intervalos:
+			suma = 0
+			for x in Y:
+				suma += i.count(x)
+			N.append(suma)
+
+		p = estimarPbinomial(Y, 8)
+
+		binomial1 = []
+		for i in xrange(0,9):
+			binomial1.append(probabilidadBinomial(8,p,i))
+
+
+		Np= []
+		Np.append(binomial1[0]+binomial1[1]+binomial1[2])
+		Np.append(binomial1[3]+binomial1[4]+binomial1[5])
+		Np.append(binomial1[6]+binomial1[7]+binomial1[8])
+
+		T = 0
+
+		for j in xrange(len(intervalos)):
+			denomi = n * Np[j]
+			T += (N[j] - denomi)**2 / denomi
+
+		if T >= t:
+			exitos += 1
+
+	return exitos / float(r), t
+
+def generVAbinomial(p, n):
+    '''
+    Generar variable aleatoria binomial con parametros p y n
+    '''
+    U = random()
+    i = 0
+    c = p/(1 - p)
+    pr = (1 - p)**n
+    F = pr
+
+    while U >= F:
+        pr = (c * (n - i) / (i + 1)) * pr
+        F += pr
+        i += 1
+
+    return i
+
+def ejer5ext2(r):
+	'''
+	k = numero de intervalos
+	r = numero de iteraciones
+	'''
+
+	l = [6,7,3,4,7,2,6,3,7,8,2,1,3,5,8,7]
+	n = len(l) # numero de muestra
+	t = tabla2()
+	intervalos = [[0,1,2,3],[4],[5],[6],[7,8]]
+	pMuestra = estimarPbinomial(l, 8) # obtener la estimacion de la muestra
+	exitos = 0
+	for _ in xrange(r):
+		Y = []
+		for i in xrange(n):
+			# generamos los Y de la F propuesta con parametro p y n = 8
+			Y.append(generVAbinomial(pMuestra, 8))
+
+		N = []
+		for i in intervalos:
+			suma = 0
+			for x in Y:
+				suma += i.count(x)
+			N.append(suma)
+
+
+		p = estimarPbinomial(Y, 8)
+
+		binomial1 = []
+		for i in xrange(0,9):
+			binomial1.append(probabilidadBinomial(8,p,i))
+
+
+		Np= []
+		Np.append(binomial1[0]+binomial1[1]+binomial1[2]+binomial1[3])
+		Np.append(binomial1[4])
+		Np.append(binomial1[5])
+		Np.append(binomial1[6])
+		Np.append(binomial1[7]+binomial1[8])
+
+		T = 0
+
+		for j in xrange(len(intervalos)):
+			denomi = n * Np[j]
+			T += (N[j] - denomi)**2 /float(denomi)
+
+		if T >= t:
+			print("asd")
+			exitos += 1
+
+	return exitos / float(r), t
+
+print(ejer5ext2(10000))
+
+
+def ejer5():
+    simulado, t = ejer5ext1(1000)
+    print "simulado es", simulado, t
+
+
 
 def ejercicio6(alfa):
     valoresD = []
@@ -403,27 +615,145 @@ def aproxNormal(n,m,r):
     else:
         return 2*(1 - st.norm(0, 1).cdf(rPrima))
 
-#a = aproxNormal(5,10,55) esto funciona bien !!!!!!!!!!
-#print(a)
+print("------------P valor normal------------")
+a = aproxNormal(5,10,55)
+print(a)
+print("------------P recursivo------------")
 
-# print(recursivoPvalor(5,10,55)) pValor recursivo tmb funciona!!!!!!!
+print(recursivoPvalor(5,10,55))
 
-def simularPvalor(n,m,r,t):
-    Rmenor = 0
-    Rmayor = 0
-    var = list(range(1,n+m))
-    for _ in range(t):
-        
-        
-        total = 0
-        shuffle(var)
-        for i in range(n):
-            total += var[i]
-    
-        if total < r:
-            Rmenor += 1
+def rangoR(muestra1, nmMuestras):
+    nmMuestras.sort()
+
+    R = []
+    for valor in muestra1:
+    	suma = 0
+    	if nmMuestras.index(valor) != len(nmMuestras) -1 and nmMuestras[nmMuestras.index(valor) + 1] == valor:
+    		i=1
+    		suma = nmMuestras.index(valor) + 1
+    		count = 1
+	    	while nmMuestras[nmMuestras.index(valor) + i] == valor:
+	    		suma += nmMuestras.index(valor) + i + 1
+	    		count +=1
+	    		i +=1
+	    	R.append(suma/float(count))
+    	else:
+        	R.append(nmMuestras.index(valor) + 1)
+
+    return sum(R)
+
+def pValorSimu(muestra1, muestra2, simula):
+    '''
+    CALCULO p-valor SIMULADO
+    '''
+    nmMuestras = muestra1 + muestra2
+    n = len(muestra1)
+    r = rangoR(muestra1, nmMuestras)
+    Rmin = 0
+    Rmax = 0
+
+    copyMuestra = list(nmMuestras)
+    for _ in xrange(simula):
+        shuffle(copyMuestra)
+        remuestreo = copyMuestra[0:n]
+        R = rangoR(remuestreo, copyMuestra)
+
+        if R >= r:
+            Rmax += 1
+
         else:
-            Rmayor += 1
-    return Rmenor/float(t), Rmayor/float(t)
+            Rmin += 1
 
-#print(simularPvalor(5,10,55,1000)) esto anda mall 
+    return 2 * min(Rmax / float(simula), Rmin / float(simula))
+
+print ("----------simular P valor------ ")
+print(pValorSimu([132,104,162,171,129],[107,94,136,99,114,122,108,130,106,88],10000))
+
+"""
+multiples muestras, m muestras
+H0: todas las var IMP y igual dist => Todos los ordeanmientos igualmentte probables
+
+E(Ri) = n(i) * (n+1)/2 n= cantidad total de var
+R = 12/n*(n+1)* [ sum (1 to m) (Ri - E(Ri))**2
+									/n(i)
+
+para valores no tan grandes
+p valor = P(R>=y)
+
+para valores gnrandes de n(i)
+valor p = P(X(m-1) >= y)
+"""
+def espRango(ni,n):
+	return ni*(n+1)/float(2)
+
+def ejercicio15():
+	m1= [121,144,158,169,194,211,242]
+	m2= [99,128,165,193,242,265,302]
+	m3= [129,134,137,143,152,159,170]
+	m4 = m1+ m2 + m3
+	m4.sort()
+	R1 = rangoR(m1,m4)
+
+	R2 = rangoR(m2,m4)
+	R3 = rangoR(m3,m4)
+	listaRangos = []
+	listaRangos.append(R1)
+	listaRangos.append(R2)
+	listaRangos.append(R3)
+	print(listaRangos)
+	listaNi = []
+	listaNi.append(len(m1))
+	listaNi.append(len(m2))
+	listaNi.append(len(m3))
+
+	n = len(m4)
+	a = 12/float(n*(n+1))
+	print a
+	b = 0
+	for i in xrange(3):
+		b += ((listaRangos[i] - espRango(7,21))**2/float(7))
+
+	R = a*b
+	#c = 1 - st.chi2.cdf(R,2)
+	return R
+
+
+
+def pValorSimuM(simula):
+	'''
+	CALCULO p-valor SIMULADO
+	'''
+
+	m1= [121,144,158,169,194,211,242]
+	m2= [99,128,165,193,242,265,302]
+	m3= [129,134,137,143,152,159,170]
+	m4 = m1+ m2 + m3
+	lista = []
+	lista.append(len(m1))
+	lista.append(len(m2))
+	lista.append(len(m3))
+	nmMuestras = m4
+	pvalor = []
+	Rmin = 0
+	Rmax = 0
+
+	n = choice(lista)
+	r = ejercicio15()
+	print(r)
+
+	copyMuestra = list(nmMuestras)
+	for _ in xrange(simula):
+		shuffle(copyMuestra)
+		remuestreo = copyMuestra[0:n]
+		R = rangoR(remuestreo, copyMuestra)
+
+		if R >= r:
+			Rmax += 1
+
+		else:
+			Rmin += 1
+
+	pvalor=(2 * min(Rmax / float(simula), Rmin / float(simula)))
+	print(pvalor)
+
+pValorSimuM(1000)
