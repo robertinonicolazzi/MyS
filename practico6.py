@@ -54,9 +54,11 @@ def montecarlo(n):
 
 	return sumExp / float(n)
 
-
+"""
+-------- controlado
+"""
 def algoritmoProporcion(n=100,p):
-    P = p
+    P = p # x es 0 o 1
     for i in xrange(2, n+1):
         X = p
         P = P + (X-P)/float(i)
@@ -69,6 +71,13 @@ def algoritmoProporcion(n=100,p):
         P = P + (X-P)/float(j)
 
     return P
+
+"""
+-------- controlado ECM(0p,0)= E[(0p - 0)^2]
+Var(0p) + (E[0p] - 0)^2
+
+S2 = sum(Xi - X(n))^2/n-1
+"""
 
 def algoritmo(n,p):
     M = p
@@ -91,6 +100,7 @@ def algoritmo(n,p):
     return M
 
 def ejercicio1():
+	print("----------ejercicio1---------")
     print(algoritmo(100,normalMejorada))
 
 def ejercicio2():
@@ -98,6 +108,10 @@ def ejercicio2():
 
 def ejer3():
 
+
+	intervalo 
+
+	#st.norm.ppf(0.05) da el Zalpha/2
     N = ejer3Ext()
     # generar v.a. normal N
     S2, M = 0, N

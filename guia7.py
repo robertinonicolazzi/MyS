@@ -1,6 +1,7 @@
 from math import exp, log,floor,sqrt,factorial
 from random import random,randint, choice,shuffle
 from parcialVariables import binomial
+import numpy as nm
 import scipy.stats as st
 import scipy.special as ss
 
@@ -295,12 +296,13 @@ def tabla():
 	Np.append(binomial1[3]+binomial1[4]+binomial1[5])
 	Np.append(binomial1[6]+binomial1[7]+binomial1[8])
 
+	fexp = [18*x for x in Np]
 
 	T = 0
 	for j in xrange(len(intervalos)):
 		denomi = n * Np[j]
 		T += (N[j] - denomi)**2 / denomi
-	return T
+	return T,N,fexp
 
 
 
@@ -346,6 +348,10 @@ def ejercicio5b():
     print " chi (python)",st.chisquare(val1, f_exp=[2.37,3.49,4.5,3.62,2.01],ddof=1)
     print " chi2", 1 - st.chi2.cdf(tabla2(),3)
 
+
+
+
+
 print("------------ejercicio5b------------")
 ejercicio5b()
 
@@ -357,7 +363,7 @@ def ejer5ext1(r):
 	l = [6,7,3,4,7,3,7,2,6,3,7,8,2,1,3,5,8,7]
 	l = [6, 7, 3, 4, 7, 3, 7, 2, 6, 3, 7, 8, 2, 1, 3, 5, 8, 7]
 	n = len(l) # numero de muestra
-	t = tabla()
+	t, x, y = tabla()
 	intervalos = [[0,1,2],[3,4,5],[6,7,8]]
 	pMuestra = estimarPbinomial(l, 8) # obtener la estimacion de la muestra
 	exitos = 0
@@ -396,6 +402,18 @@ def ejer5ext1(r):
 			exitos += 1
 
 	return exitos / float(r), t
+
+def ejercicio5():
+    T,N,fexp = tabla()
+    print " chi (python)",st.chisquare(N, f_exp=fexp,ddof=1)
+    print " chi2", 1 - st.chi2.cdf(T,1)  
+    simulado, t = ejer5ext1(10000)
+    print "simulado es", simulado, t
+
+
+print("------------ejercicio5------------")
+ejercicio5()
+
 
 def generVAbinomial(p, n):
     '''
@@ -466,12 +484,7 @@ def ejer5ext2(r):
 
 	return exitos / float(r), t
 
-print(ejer5ext2(10000))
 
-
-def ejer5():
-    simulado, t = ejer5ext1(1000)
-    print "simulado es", simulado, t
 
 
 
@@ -683,24 +696,28 @@ p valor = P(R>=y)
 para valores gnrandes de n(i)
 valor p = P(X(m-1) >= y)
 """
+print ("----------multiples colas------ ")
 def espRango(ni,n):
 	return ni*(n+1)/float(2)
 
-def ejercicio15():
-	m1= [121,144,158,169,194,211,242]
-	m2= [99,128,165,193,242,265,302]
-	m3= [129,134,137,143,152,159,170]
+
+m1= [121,144,158,169,194,211,242]
+m2= [99,128,165,193,242,265,302]
+m3= [129,134,137,143,152,159,170]
+
+def ejercicio15(m1,m2,m3):
+
 	m4 = m1+ m2 + m3
 	m4.sort()
 	R1 = rangoR(m1,m4)
-
+	#print "python test",st.mstats.kruskalwallis(m1,m2,m3)
 	R2 = rangoR(m2,m4)
 	R3 = rangoR(m3,m4)
 	listaRangos = []
 	listaRangos.append(R1)
 	listaRangos.append(R2)
 	listaRangos.append(R3)
-	print(listaRangos)
+
 	listaNi = []
 	listaNi.append(len(m1))
 	listaNi.append(len(m2))
@@ -708,12 +725,13 @@ def ejercicio15():
 
 	n = len(m4)
 	a = 12/float(n*(n+1))
-	print a
+
 	b = 0
 	for i in xrange(3):
-		b += ((listaRangos[i] - espRango(7,21))**2/float(7))
+		b += ((listaRangos[i] - espRango(7,21))**2)/float(7)
 
 	R = a*b
+	#print "R",R
 	#c = 1 - st.chi2.cdf(R,2)
 	return R
 
@@ -733,19 +751,21 @@ def pValorSimuM(simula):
 	lista.append(len(m2))
 	lista.append(len(m3))
 	nmMuestras = m4
+
 	pvalor = []
 	Rmin = 0
 	Rmax = 0
 
 	n = choice(lista)
-	r = ejercicio15()
-	print(r)
+	r = ejercicio15(m1,m2,m3)
 
 	copyMuestra = list(nmMuestras)
 	for _ in xrange(simula):
 		shuffle(copyMuestra)
 		remuestreo = copyMuestra[0:n]
-		R = rangoR(remuestreo, copyMuestra)
+		remuestreo2 = copyMuestra[n:2*n]
+		remuestreo3 = copyMuestra[2*n:3*n]
+		R = ejercicio15(remuestreo, remuestreo2,remuestreo3)
 
 		if R >= r:
 			Rmax += 1
@@ -753,7 +773,41 @@ def pValorSimuM(simula):
 		else:
 			Rmin += 1
 
-	pvalor=(2 * min(Rmax / float(simula), Rmin / float(simula)))
-	print(pvalor)
+	pvalor=min(Rmax / float(simula), Rmin / float(simula))
+	print "p valor simu", pvalor
 
-pValorSimuM(1000)
+
+pValorSimuM(10000)
+r = ejercicio15(m1,m2,m3)
+print 1 - st.chi2.cdf(r,2)
+
+"""poissson no homogeneo
+
+
+T = S2/Nbarra valor p = 2*min[P(T<t),P(T>t)]
+"""
+def poissonNo(simulaciones):
+	m = [18,24,16,19,25]
+	EX = estimarEsperanza(m)
+	V,DV = estimarDesviacion(m,EX)
+	T = V/float(EX)
+	Rmax = 0
+	Rmin = 0
+	for _ in xrange(simulaciones):
+		r=[]
+		r = [nm.random.poisson(EX) for _ in xrange(len(m))]
+		print(r)
+		E = estimarEsperanza(r)
+		V,DV = estimarDesviacion(r,E)
+		t = V/float(E)
+
+		if t >= T:
+			Rmax += 1
+
+		else:
+			Rmin += 1
+
+	return 2*min(Rmax / float(simulaciones), Rmin / float(simulaciones))
+
+print "poisssssosn"
+print(poissonNo(1000))
