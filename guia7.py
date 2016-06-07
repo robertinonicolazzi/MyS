@@ -772,7 +772,7 @@ def pValorSimuM(simula):
 
 		else:
 			Rmin += 1
-
+	#pvalor es P (R>Y)
 	pvalor=min(Rmax / float(simula), Rmin / float(simula))
 	print "p valor simu", pvalor
 
@@ -811,3 +811,68 @@ def poissonNo(simulaciones):
 
 print "poisssssosn"
 print(poissonNo(1000))
+
+#luego de esto usar el wacho de muchas muestras kruskal
+# si p valor pequeño se rechaza la hipotesis
+
+#valor P = 2 min { R<=Y, R>=y}
+#		   2 min {Xr-1} r = cantidad muestras
+"""
+estiamr lambda(t)
+ordenar los N tiempos de llegada
+en el tiempo Yj-1 Yj ocurrio llegada en el total de r dias
+en un dia hay promedio 1/r llegadas
+lambda(t) = 1 / (Yj-Y(j-1) * r) Yj-1 < t Yj
+
+
+homogeneo
+validar como no homogeneo que sea de poisson
+Xr,Nr r = cantidad muestras
+N = N1 + N2 + .. Nr , total lelgadas
+H0 Los N tiempos de llegada estan distribuiods uniformemente en un dia, o intervalo (0,T)
+
+"""
+"""
+
+BOOTSTRAP
+Ai: tiempo de arribo del cliente i.
+Si: tiempo de servicio del cliente i.
+Vi: tiempo de salida del cliente i.
+Vi = max{Ai, Vi−1} + Si, V0 = 0
+
+Wi: tiempo que pasa el cliente i en el sistema,
+Wi = Vi − Ai = max{Ai, Vi−1} + Si − A
+
+
+Ni ← número de clientes el día i:
+Di ← suma de tiempos que permanecen los clientes en el sistema el
+día i:
+D1 = W1 + · · · + WN1
+D2 = WN1+1 + · · · + WN1+N2
+.
+.
+.
+Di = WN1+···+Ni−1+1 + · · · + WN1+···+Ni
+I Notar: los tiempos Di y los números Ni son independientes e
+idénticamente distribuidos.
+
+µ = W1 + · · · + Wn/n
+= limm→∞
+D1 + · · · + Dm
+N1 + · · · + Nm
+= limm→∞
+(D1 + · · · + Dm)/m
+(N1 + · · · + Nm)/m
+=
+E[D]
+E[N]
+
+
+ECM(D/N) = E"P
+P
+i Di
+i Ni
+− µ
+2
+#
+.
